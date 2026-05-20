@@ -1,0 +1,63 @@
+name: FinderRight
+options:
+  bundleIdPrefix: com.finderright
+  deploymentTarget:
+    macOS: "13.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Automatic
+
+packages:
+  FinderRightKit:
+    path: FinderRightKit
+
+targets:
+  FinderRight:
+    type: application
+    platform: macOS
+    sources:
+      - FinderRight
+    dependencies:
+      - target: FinderRightSync
+        embed: true
+        codeSign: true
+      - package: FinderRightKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.finderright.app
+        INFOPLIST_FILE: FinderRight/Info.plist
+        CODE_SIGN_ENTITLEMENTS: FinderRight/FinderRight.entitlements
+        GENERATE_INFOPLIST_FILE: false
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+    info:
+      path: FinderRight/Info.plist
+
+  FinderRightSync:
+    type: app-extension
+    platform: macOS
+    sources:
+      - FinderRightSync
+    dependencies:
+      - sdk: FinderSync.framework
+        embed: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.finderright.app.sync
+        INFOPLIST_FILE: FinderRightSync/Info.plist
+        CODE_SIGN_ENTITLEMENTS: FinderRightSync/FinderRightSync.entitlements
+        GENERATE_INFOPLIST_FILE: false
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@executable_path/../../../../Frameworks"
+    info:
+      path: FinderRightSync/Info.plist
