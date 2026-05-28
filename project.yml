@@ -6,13 +6,16 @@ options:
   xcodeVersion: "16.0"
   generateEmptyDirectories: true
   groupSortPosition: top
+  developmentLanguage: zh-Hans
+  knownRegions:
+    - zh-Hans
+    - en
+    - Base
 
 settings:
   base:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "13.0"
-    CODE_SIGN_IDENTITY: "-"
-    CODE_SIGN_STYLE: Automatic
 
 packages:
   FinderRightKit:
@@ -35,11 +38,13 @@ targets:
         INFOPLIST_FILE: FinderRight/Info.plist
         CODE_SIGN_ENTITLEMENTS: FinderRight/FinderRight.entitlements
         GENERATE_INFOPLIST_FILE: false
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         LD_RUNPATH_SEARCH_PATHS:
           - "$(inherited)"
           - "@executable_path/../Frameworks"
-    info:
-      path: FinderRight/Info.plist
+    # 注意：不要在这里写 `info:` block —— xcodegen 会用它生成全新 Info.plist，
+    # 覆盖我们手动维护的关键字段（CFBundleURLTypes 等）。Info.plist 由 INFOPLIST_FILE
+    # 指定，由我们自己维护。
 
   FinderRightSync:
     type: app-extension
@@ -49,6 +54,7 @@ targets:
     dependencies:
       - sdk: FinderSync.framework
         embed: false
+      - package: FinderRightKit
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.finderright.app.sync
@@ -59,5 +65,5 @@ targets:
           - "$(inherited)"
           - "@executable_path/../Frameworks"
           - "@executable_path/../../../../Frameworks"
-    info:
-      path: FinderRightSync/Info.plist
+    # 同上：不要 `info:` block。NSExtension 字段必须在 Info.plist 中手动保留，
+    # 否则 FinderSync 扩展不被 macOS 识别 → pluginkit 不显示 → 右键无菜单。

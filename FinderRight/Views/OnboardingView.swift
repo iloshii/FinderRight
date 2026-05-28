@@ -161,8 +161,8 @@ struct WelcomeStep: View {
 struct FeatureHighlight: View {
     let icon: String
     let color: Color
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
 
     var body: some View {
         HStack(spacing: 14) {
@@ -262,7 +262,7 @@ struct EnableExtensionStep: View {
 
 struct StepInstruction: View {
     let number: Int
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         HStack(spacing: 12) {
@@ -350,7 +350,7 @@ struct CompletionStep: View {
 
 struct MenuPreviewItem: View {
     let icon: String
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         HStack(spacing: 10) {

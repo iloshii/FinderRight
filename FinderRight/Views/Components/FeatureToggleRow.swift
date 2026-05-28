@@ -25,7 +25,7 @@ struct FeatureToggleRow: View {
         .onAppear {
             isEnabled = sharedDefaults.bool(forKey: feature.key, defaultValue: true)
         }
-        .onChange(of: isEnabled) { _, newValue in
+        .onChange(of: isEnabled) { newValue in
             sharedDefaults.set(newValue, forKey: feature.key)
         }
     }

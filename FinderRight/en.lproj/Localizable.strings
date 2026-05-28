@@ -1,0 +1,131 @@
+/* FinderRight main app — English localization */
+
+/* App / window */
+"欢迎使用 FinderRight" = "Welcome to FinderRight";
+"FinderRight 运行中" = "FinderRight is running";
+"设置..." = "Settings…";
+"引导设置" = "Setup Guide";
+"退出 FinderRight" = "Quit FinderRight";
+
+/* Settings tabs */
+"通用" = "General";
+"功能" = "Features";
+"快捷键" = "Shortcuts";
+"终端 / 编辑器" = "Terminal / Editor";
+"关于" = "About";
+
+/* Feature categories */
+"文件操作" = "File Operations";
+"开发工具" = "Development";
+"快捷操作" = "Quick Actions";
+"剪贴板" = "Clipboard";
+
+/* Feature list — names & descriptions */
+"新建文件" = "New File";
+"在当前目录新建文件" = "Create a new file in the current folder";
+"新建文件夹" = "New Folder";
+"在当前目录新建文件夹" = "Create a new folder in the current folder";
+"复制路径" = "Copy Path";
+"复制文件或文件夹的完整路径" = "Copy the full path of files or folders";
+"移到废纸篓" = "Move to Trash";
+"将选中项移到废纸篓" = "Move selected items to Trash";
+"在终端中打开" = "Open in Terminal";
+"使用默认终端打开当前目录" = "Open the current folder in your default terminal";
+"在编辑器中打开" = "Open in Editor";
+"使用默认编辑器打开文件" = "Open files in your default editor";
+"Git 初始化" = "Git Init";
+"在当前目录初始化 Git 仓库" = "Initialize a Git repository in the current folder";
+"压缩" = "Compress";
+"压缩选中的文件或文件夹" = "Compress selected files or folders";
+"分享" = "Share";
+"快速分享选中的文件" = "Quickly share selected files";
+"快速预览" = "Quick Look";
+"预览文件内容" = "Preview file contents";
+"复制文件名" = "Copy File Name";
+"复制文件名到剪贴板" = "Copy file name to clipboard";
+"复制相对路径" = "Copy Relative Path";
+"复制相对路径到剪贴板" = "Copy relative path to clipboard";
+
+/* General tab */
+"开机自动启动" = "Launch at Login";
+"登录时自动运行 FinderRight" = "Run FinderRight automatically at login";
+"显示菜单栏图标" = "Show Menu Bar Icon";
+"关闭后，菜单栏不显示 FinderRight 图标" = "When off, FinderRight won't appear in the menu bar";
+"显示程序坞图标" = "Show Dock Icon";
+"关闭后，FinderRight 在 Dock 中隐藏（仍可后台运行）" = "When off, FinderRight is hidden from the Dock (still runs in the background)";
+"启动" = "Startup";
+"显示" = "Appearance";
+"两个图标都关闭后，可通过 Spotlight 搜索「FinderRight」重新打开偏好设置" = "With both icons off, search \"FinderRight\" in Spotlight to reopen Settings";
+"权限" = "Permissions";
+"「完全磁盘访问」让你能在 ~/Documents、~/Desktop、~/Pictures 等受保护目录使用所有功能。「辅助功能」让「切换隐藏文件」时 Finder 窗口不闪烁。" = "\"Full Disk Access\" lets all features work in protected folders like ~/Documents, ~/Desktop, ~/Pictures. \"Accessibility\" keeps the Finder window from flickering when toggling hidden files.";
+
+/* Tools tab */
+"默认终端" = "Default Terminal";
+"选择右键菜单中「在终端中打开」使用的终端应用" = "Choose the terminal used by \"Open in Terminal\"";
+"终端" = "Terminal";
+"默认编辑器" = "Default Editor";
+"选择右键菜单中「在编辑器中打开」使用的编辑器应用" = "Choose the editor used by \"Open in Editor\"";
+"编辑器" = "Editor";
+"文本编辑" = "TextEdit";
+
+/* About tab */
+"版本 %@ (%@)" = "Version %@ (%@)";
+"增强 macOS Finder 右键菜单的强大工具。\n快速访问开发工具、文件操作和自定义动作。" = "A powerful tool to enhance the macOS Finder right-click menu.\nQuick access to dev tools, file operations, and custom actions.";
+"GitHub 仓库" = "GitHub Repository";
+
+/* Shortcuts tab */
+"打开终端" = "Open Terminal";
+"剪切" = "Cut";
+"粘贴" = "Paste";
+"压缩为 ZIP" = "Compress to ZIP";
+"解压到当前目录" = "Extract Here";
+"切换隐藏文件" = "Toggle Hidden Files";
+"右键菜单快捷键" = "Right-Click Menu Shortcuts";
+"需含 ⌘、⌥ 或 ⌃ 之一。点击按钮后按键录制，Delete 清除，ESC 取消。" = "Must include ⌘, ⌥, or ⌃. Click to record, Delete to clear, ESC to cancel.";
+"按下快捷键…" = "Press shortcut…";
+"未设置" = "Not Set";
+
+/* Onboarding */
+"上一步" = "Back";
+"下一步" = "Next";
+"开始使用" = "Get Started";
+"增强你的 Finder 右键菜单" = "Supercharge your Finder right-click menu";
+"快速打开终端" = "Quickly Open Terminal";
+"在任意目录一键打开终端或编辑器" = "Open a terminal or editor in any folder with one click";
+"高效文件操作" = "Efficient File Operations";
+"复制路径、新建文件、压缩等常用操作" = "Copy path, new file, compress, and more";
+"完全可定制" = "Fully Customizable";
+"自由选择需要的功能，隐藏不需要的" = "Enable the features you want, hide the ones you don't";
+"启用 Finder 扩展" = "Enable the Finder Extension";
+"需要在系统设置中启用 FinderRight 扩展" = "You need to enable the FinderRight extension in System Settings";
+"点击下方按钮打开系统设置" = "Click the button below to open System Settings";
+"在「扩展」列表中找到 FinderRight" = "Find FinderRight in the \"Extensions\" list";
+"勾选启用 Finder 扩展" = "Check to enable the Finder extension";
+"打开系统设置" = "Open System Settings";
+"完成后点击「下一步」继续" = "Click \"Next\" when done";
+"一切就绪！" = "All set!";
+"FinderRight 已准备好为你服务" = "FinderRight is ready to go";
+"右键菜单预览" = "Right-Click Menu Preview";
+"在 VS Code 中打开" = "Open in VS Code";
+
+/* Full Disk Access */
+"完全磁盘访问" = "Full Disk Access";
+"已授权" = "Granted";
+"未授权 — 在 ~/Pictures、~/Documents 等受保护目录将无法工作" = "Not granted — won't work in protected folders like ~/Pictures, ~/Documents";
+"FinderRight 需要「完全磁盘访问」权限，才能在系统保护目录（Documents、Desktop、Downloads、Pictures、Movies、Music）执行右键菜单功能。" = "FinderRight needs Full Disk Access to run right-click actions in protected folders (Documents, Desktop, Downloads, Pictures, Movies, Music).";
+"打开系统设置授权…" = "Open System Settings…";
+"重新检测" = "Re-check";
+"授权步骤说明" = "How to grant access";
+"1. 点击上方按钮，会自动跳转到「完全磁盘访问」列表" = "1. Click the button above to jump to the Full Disk Access list";
+"2. 点击列表底部 +，添加 FinderRight.app" = "2. Click + at the bottom and add FinderRight.app";
+"3. 打开 FinderRight 旁边的开关" = "3. Turn on the switch next to FinderRight";
+"4. 回到此处点击「重新检测」" = "4. Come back and click \"Re-check\"";
+
+/* Accessibility */
+"辅助功能" = "Accessibility";
+"未授权 — 「切换隐藏文件」会让 Finder 窗口短暂闪烁" = "Not granted — \"Toggle Hidden Files\" will briefly flicker the Finder window";
+"FinderRight 用「辅助功能」权限模拟 Cmd+Shift+. 快捷键，实现 Finder 隐藏文件即时切换（无需重启 Finder）。授权后 Finder 窗口不再闪烁。" = "FinderRight uses Accessibility to simulate the Cmd+Shift+. shortcut for instant hidden-file toggling (without restarting Finder). Once granted, the Finder window stops flickering.";
+"打开辅助功能设置…" = "Open Accessibility Settings…";
+"1. 点击上方按钮，会跳转到「辅助功能」列表" = "1. Click the button above to jump to the Accessibility list";
+"2. 找到 FinderRight 并打开开关；如果列表里没有，点 + 添加 FinderRight.app" = "2. Find FinderRight and turn it on; if it's not listed, click + and add FinderRight.app";
+"3. 回到此处点击「重新检测」" = "3. Come back and click \"Re-check\"";

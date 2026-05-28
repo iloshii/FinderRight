@@ -18,25 +18,11 @@ struct MenuBarView: View {
 
             Divider()
 
-            // 功能按钮
-            Button {
-                openSettings()
-            } label: {
-                HStack {
-                    Image(systemName: "gearshape")
-                    Text("设置...")
-                    Spacer()
-                    Text("⌘,")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .keyboardShortcut(",", modifiers: .command)
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 6)
+            // 设置按钮
+            SettingsButtonView()
 
             Button {
+                NSApp.activate(ignoringOtherApps: true)
                 openWindow(id: "onboarding")
             } label: {
                 HStack {
@@ -72,14 +58,56 @@ struct MenuBarView: View {
         .padding(.vertical, 6)
         .frame(width: 240)
     }
+}
 
-    private func openSettings() {
-        if #available(macOS 14.0, *) {
-            NSApp.activate()
-            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        } else {
+// 单独的 View 处理 openSettings，避免 @available 污染整个结构体
+@available(macOS 14.0, *)
+private struct SettingsButtonWithEnv: View {
+    @Environment(\.openSettings) private var openSettings
+
+    var body: some View {
+        Button {
             NSApp.activate(ignoringOtherApps: true)
-            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+            openSettings()
+        } label: {
+            HStack {
+                Image(systemName: "gearshape")
+                Text("设置...")
+                Spacer()
+                Text("⌘,")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .keyboardShortcut(",", modifiers: .command)
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
+    }
+}
+
+private struct SettingsButtonView: View {
+    var body: some View {
+        if #available(macOS 14.0, *) {
+            SettingsButtonWithEnv()
+        } else {
+            Button {
+                NSApp.activate(ignoringOtherApps: true)
+                NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+            } label: {
+                HStack {
+                    Image(systemName: "gearshape")
+                    Text("设置...")
+                    Spacer()
+                    Text("⌘,")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .keyboardShortcut(",", modifiers: .command)
+            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
         }
     }
 }

@@ -17,19 +17,24 @@ public struct FileTemplate: Codable, Equatable, Identifiable {
     }
 }
 
-// MARK: - App Group 配置管理
+// MARK: - 文件共享配置管理（无需 App Group）
 
-/// App Group UserDefaults 共享配置管理器
+/// 基于文件的共享配置管理器，存储在 ~/Library/Application Support/FinderRight/settings.plist
+/// 替代 App Group UserDefaults，避免需要开发者账号和 Provisioning Profile
 public final class SharedConfig {
 
-    /// App Group identifier
-    public static let appGroupID = "group.com.finderright.shared"
+    /// 共享配置文件路径
+    public static let sharedFileURL: URL = {
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let dir = appSupport.appendingPathComponent("FinderRight")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent("settings.plist")
+    }()
 
     /// 单例
     public static let shared = SharedConfig()
 
-    /// App Group UserDefaults
-    private let defaults: UserDefaults
+    private var store: [String: Any] = [:]
 
     private enum Keys {
         static let enabledActions = "enabledActions"
@@ -37,15 +42,25 @@ public final class SharedConfig {
         static let preferredEditor = "preferredEditor"
         static let customFileTemplates = "customFileTemplates"
         static let showHiddenFiles = "showHiddenFiles"
+        static let shortcuts = "shortcuts"
     }
 
     private init() {
-        if let groupDefaults = UserDefaults(suiteName: SharedConfig.appGroupID) {
-            self.defaults = groupDefaults
-        } else {
-            // Fallback to standard UserDefaults if App Group is not available
-            self.defaults = UserDefaults.standard
+        load()
+    }
+
+    private func load() {
+        guard let data = try? Data(contentsOf: SharedConfig.sharedFileURL),
+              let dict = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any] else {
+            store = [:]
+            return
         }
+        store = dict
+    }
+
+    private func save() {
+        guard let data = try? PropertyListSerialization.data(fromPropertyList: store, format: .xml, options: 0) else { return }
+        try? data.write(to: SharedConfig.sharedFileURL, options: .atomic)
     }
 
     // MARK: - Enabled Actions
@@ -53,10 +68,11 @@ public final class SharedConfig {
     /// 每个 action 的开关状态，key 为 action id
     public var enabledActions: [String: Bool] {
         get {
-            defaults.dictionary(forKey: Keys.enabledActions) as? [String: Bool] ?? [:]
+            return store[Keys.enabledActions] as? [String: Bool] ?? [:]
         }
         set {
-            defaults.set(newValue, forKey: Keys.enabledActions)
+            store[Keys.enabledActions] = newValue
+            save()
         }
     }
 
@@ -77,10 +93,11 @@ public final class SharedConfig {
     /// 首选终端应用 bundle identifier
     public var preferredTerminal: String {
         get {
-            defaults.string(forKey: Keys.preferredTerminal) ?? "com.apple.Terminal"
+            return store[Keys.preferredTerminal] as? String ?? "com.apple.Terminal"
         }
         set {
-            defaults.set(newValue, forKey: Keys.preferredTerminal)
+            store[Keys.preferredTerminal] = newValue
+            save()
         }
     }
 
@@ -89,10 +106,11 @@ public final class SharedConfig {
     /// 首选编辑器应用 bundle identifier
     public var preferredEditor: String {
         get {
-            defaults.string(forKey: Keys.preferredEditor) ?? "com.microsoft.VSCode"
+            return store[Keys.preferredEditor] as? String ?? "com.microsoft.VSCode"
         }
         set {
-            defaults.set(newValue, forKey: Keys.preferredEditor)
+            store[Keys.preferredEditor] = newValue
+            save()
         }
     }
 
@@ -101,12 +119,13 @@ public final class SharedConfig {
     /// 自定义文件模板列表
     public var customFileTemplates: [FileTemplate] {
         get {
-            guard let data = defaults.data(forKey: Keys.customFileTemplates) else { return [] }
+            guard let data = store[Keys.customFileTemplates] as? Data else { return [] }
             return (try? JSONDecoder().decode([FileTemplate].self, from: data)) ?? []
         }
         set {
             if let data = try? JSONEncoder().encode(newValue) {
-                defaults.set(data, forKey: Keys.customFileTemplates)
+                store[Keys.customFileTemplates] = data
+                save()
             }
         }
     }
@@ -130,21 +149,62 @@ public final class SharedConfig {
     /// 是否显示隐藏文件
     public var showHiddenFiles: Bool {
         get {
-            defaults.bool(forKey: Keys.showHiddenFiles)
+            return store[Keys.showHiddenFiles] as? Bool ?? false
         }
         set {
-            defaults.set(newValue, forKey: Keys.showHiddenFiles)
+            store[Keys.showHiddenFiles] = newValue
+            save()
         }
+    }
+
+    // MARK: - Shortcuts
+
+    /// 菜单项快捷键，key 为 action ID（如 "shortcut.cut"）
+    public var shortcuts: [String: ActionShortcut] {
+        get {
+            guard let data = store[Keys.shortcuts] as? Data else { return [:] }
+            return (try? JSONDecoder().decode([String: ActionShortcut].self, from: data)) ?? [:]
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue) {
+                store[Keys.shortcuts] = data
+                save()
+            }
+        }
+    }
+
+    /// 获取指定 action 的快捷键
+    public func shortcut(forActionId id: String) -> ActionShortcut? {
+        shortcuts[id]
+    }
+
+    /// 设置或清除指定 action 的快捷键
+    public func setShortcut(_ shortcut: ActionShortcut?, forActionId id: String) {
+        var current = shortcuts
+        if let s = shortcut { current[id] = s } else { current.removeValue(forKey: id) }
+        shortcuts = current
     }
 
     // MARK: - Reset
 
     /// 重置所有配置为默认值
     public func resetToDefaults() {
-        defaults.removeObject(forKey: Keys.enabledActions)
-        defaults.removeObject(forKey: Keys.preferredTerminal)
-        defaults.removeObject(forKey: Keys.preferredEditor)
-        defaults.removeObject(forKey: Keys.customFileTemplates)
-        defaults.removeObject(forKey: Keys.showHiddenFiles)
+        store = [:]
+        save()
+    }
+}
+
+// MARK: - 快捷键模型
+
+/// 菜单项快捷键（key + 修饰键）
+public struct ActionShortcut: Codable, Equatable {
+    /// 单字符按键（小写），如 "x"、"v"
+    public var key: String
+    /// NSEvent.ModifierFlags.rawValue（只含 command/option/shift/control）
+    public var modifiers: Int
+
+    public init(key: String, modifiers: Int) {
+        self.key = key
+        self.modifiers = modifiers
     }
 }
