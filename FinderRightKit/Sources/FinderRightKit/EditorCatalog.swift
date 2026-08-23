@@ -27,6 +27,7 @@ public enum EditorCatalog {
         KnownEditor(id: "com.apple.dt.Xcode",            name: "Xcode"),
         KnownEditor(id: "com.panic.Nova",                name: "Nova"),
         KnownEditor(id: "com.barebones.bbedit",          name: "BBEdit"),
+        KnownEditor(id: "com.coteditor.CotEditor",       name: "CotEditor"),
         KnownEditor(id: "com.apple.TextEdit",            name: "TextEdit"),
         // JetBrains 全家桶（九大 IDE，含 IDEA/PyCharm 的 CE 变体）。
         // bundle id 大小写系各产品历史不一致；写错只会因"未安装"被过滤隐藏，不影响路径正确性。
