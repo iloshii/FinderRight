@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import ServiceManagement
 import FinderRightKit
 
 // MARK: - 终端 & 编辑器定义
@@ -100,6 +101,9 @@ struct GeneralTab: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                .onChange(of: launchAtLogin) { want in
+                    applyLoginItem(want: want)
+                }
             } header: {
                 Text("启动")
             }
@@ -164,7 +168,28 @@ struct GeneralTab: View {
         .formStyle(.grouped)
         .padding()
     }
+
+    /// 开机自启：把开关状态落到系统（SMAppService），失败时回滚开关保持一致
+    private func applyLoginItem(want: Bool) {
+        let service = SMAppService.mainApp
+        do {
+            if want {
+                if service.status != .enabled {
+                    try service.register()
+                }
+            } else {
+                if service.status == .enabled {
+                    try service.unregister()
+                }
+            }
+            NSLog("[GeneralTab] login item \(want ? "registered" : "removed")")
+        } catch {
+            NSLog("[GeneralTab] login item \(want ? "register" : "remove") failed: \(error.localizedDescription)")
+            launchAtLogin = !want
+        }
+    }
 }
+
 
 // MARK: - 功能 Tab
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import ServiceManagement
 
 @main
 struct FinderRightApp: App {
@@ -82,6 +83,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSLog("[AppDelegate] showing settings window on launch")
             self.openSettings()
         }
+
+        // 开机自启对账：以系统注册状态修正本地偏好
+        syncLaunchAtLoginPref()
     }
 
     /// 运行中再次打开 App（Finder 双击 / Spotlight）：弹出设置窗口
@@ -89,6 +93,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSLog("[AppDelegate] reopen requested; showing settings")
         openSettings()
         return true
+    }
+
+    /// 以系统 BTM 注册状态为准修正本地偏好（用户可能在系统设置里手动移除过）
+    private func syncLaunchAtLoginPref() {
+        let enabled = SMAppService.mainApp.status == .enabled
+        let pref = UserDefaults.standard.bool(forKey: "launchAtLogin")
+        if pref != enabled {
+            UserDefaults.standard.set(enabled, forKey: "launchAtLogin")
+            NSLog("[AppDelegate] launchAtLogin pref reconciled to \(enabled)")
+        }
     }
 
     // MARK: - 原生状态栏菜单
