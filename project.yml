@@ -16,6 +16,10 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "13.0"
+    # 本地自签证书（登录钥匙串，CN=FinderRight Local，10 年）。
+    # 用它签名后 TCC 指定需求锚定证书而非 cdhash —— 重新构建不再掉「完全磁盘访问/辅助功能」授权。
+    # 重建证书的方法：见 git 提交说明或 AGENTS.md。
+    CODE_SIGN_IDENTITY: "FinderRight Local"
 
 packages:
   FinderRightKit:
