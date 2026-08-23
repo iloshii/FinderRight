@@ -29,6 +29,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var onboardingWindow: NSWindow?
     private var settingsWindow: NSWindow?
 
+    /// 收到过 finderright:// IPC 唤醒（用于冷启动时抑制设置弹窗）
+    private var urlWakeReceived = false
+
+    /// 用户是否启用了开机自启（用于区分登录拉起与手动打开）
+    private var launchAtLoginEnabled: Bool {
+        UserDefaults.standard.bool(forKey: "launchAtLogin")
+    }
+
     /// 用户是否要求常驻显示 Dock 图标
     private var alwaysShowDockIcon: Bool {
         UserDefaults.standard.object(forKey: "showDockIcon") as? Bool ?? false
@@ -61,6 +69,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.addObserver(
             self, selector: #selector(defaultsChanged),
             name: UserDefaults.didChangeNotification, object: nil)
+
+        // 打开 App 即显示设置窗口（菜单栏图标隐藏后的唯一入口）。
+        // 延迟一拍：给 finderright:// IPC 冷启动唤醒留时间窗，URL 已到则不弹窗；
+        // 开机自启拉起同样不打扰。
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            guard let self, !self.urlWakeReceived else { return }
+            if self.launchAtLoginEnabled && ProcessInfo.processInfo.systemUptime < 120 {
+                NSLog("[AppDelegate] skip startup settings window (login-item launch)")
+                return
+            }
+            NSLog("[AppDelegate] showing settings window on launch")
+            self.openSettings()
+        }
+    }
+
+    /// 运行中再次打开 App（Finder 双击 / Spotlight）：弹出设置窗口
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        NSLog("[AppDelegate] reopen requested; showing settings")
+        openSettings()
+        return true
     }
 
     // MARK: - 原生状态栏菜单
@@ -107,23 +135,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func L(_ key: String) -> String { NSLocalizedString(key, comment: "menu") }
 
     @objc private func openSettings() {
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate(ignoringOtherApps: true)
+        beginShowingStandardWindow()
         // accessory→regular 切换需延一拍，否则窗口创建早于策略生效会不显示
         DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            if self.settingsWindow == nil {
-                let hosting = NSHostingController(rootView: SettingsView())
-                let win = NSWindow(contentViewController: hosting)
-                win.title = "FinderRight"
-                win.styleMask = [.titled, .closable, .miniaturizable]
-                win.isReleasedWhenClosed = false
-                win.center()
-                self.settingsWindow = win
-            }
-            self.settingsWindow?.makeKeyAndOrderFront(nil)
-            self.settingsWindow?.orderFrontRegardless()
+            self?.showSettingsWindow()
         }
+    }
+
+    /// 创建（如需）并前置设置窗口；调用前须已 beginShowingStandardWindow()
+    private func showSettingsWindow() {
+        if settingsWindow == nil {
+            let hosting = NSHostingController(rootView: SettingsView())
+            let win = NSWindow(contentViewController: hosting)
+            win.title = "FinderRight"
+            win.styleMask = [.titled, .closable, .miniaturizable]
+            win.isReleasedWhenClosed = false
+            win.center()
+            settingsWindow = win
+        }
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        settingsWindow?.orderFrontRegardless()
     }
 
     @objc private func openOnboarding() {
@@ -190,6 +221,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// 处理 finderright:// URL scheme（IPC 唤醒入口）
     func application(_ application: NSApplication, open urls: [URL]) {
+        urlWakeReceived = true   // IPC 唤醒：抑制启动时的设置弹窗
         NSLog("[AppDelegate] application(open:) urls=\(urls)")
         for url in urls {
             IPCWatcher.shared.handle(url: url)
