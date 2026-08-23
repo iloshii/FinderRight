@@ -14,8 +14,14 @@ struct TerminalApp: Identifiable, Hashable {
         TerminalApp(id: "terminal", name: "终端", bundleIdentifier: "com.apple.Terminal", icon: "terminal"),
         TerminalApp(id: "iterm", name: "iTerm2", bundleIdentifier: "com.googlecode.iterm2", icon: "terminal.fill"),
         TerminalApp(id: "warp", name: "Warp", bundleIdentifier: "dev.warp.Warp-Stable", icon: "terminal.fill"),
+        TerminalApp(id: "ghostty", name: "Ghostty", bundleIdentifier: "com.mitchellh.ghostty", icon: "terminal.fill"),
+        TerminalApp(id: "wezterm", name: "WezTerm", bundleIdentifier: "com.github.wez.wezterm", icon: "terminal.fill"),
         TerminalApp(id: "alacritty", name: "Alacritty", bundleIdentifier: "org.alacritty", icon: "terminal.fill"),
         TerminalApp(id: "kitty", name: "Kitty", bundleIdentifier: "net.kovidgoyal.kitty", icon: "terminal.fill"),
+        TerminalApp(id: "hyper", name: "Hyper", bundleIdentifier: "co.zeit.hyper", icon: "terminal.fill"),
+        TerminalApp(id: "tabby", name: "Tabby", bundleIdentifier: "org.tabby", icon: "terminal.fill"),
+        TerminalApp(id: "rio", name: "Rio", bundleIdentifier: "com.raphaelamorim.rio", icon: "terminal.fill"),
+        TerminalApp(id: "termius", name: "Termius", bundleIdentifier: "com.termius-dmg.mac", icon: "terminal.fill"),
     ]
 }
 
