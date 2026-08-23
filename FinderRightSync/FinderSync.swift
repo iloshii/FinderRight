@@ -284,12 +284,13 @@ class FinderSync: FIFinderSync {
         logToFile("openTerminal ipc result: success=\(r.success) msg=\(r.message ?? "")")
     }
 
-    /// 检测系统已安装的编辑器（按 EditorCatalog 顺序，Zed 置顶）。
+    /// 检测系统已安装且被用户勾选的编辑器（按 EditorCatalog 顺序，Zed 置顶）。
     /// 返回项带 catalogIndex —— 即在 EditorCatalog.all 中的下标，用作菜单项 tag。
     private func installedEditors() -> [(name: String, catalogIndex: Int)] {
         EditorCatalog.all.enumerated().compactMap { idx, ed in
-            NSWorkspace.shared.urlForApplication(withBundleIdentifier: ed.id) != nil
-                ? (ed.name, idx) : nil
+            guard NSWorkspace.shared.urlForApplication(withBundleIdentifier: ed.id) != nil,
+                  SharedConfig.shared.isEditorEnabled(ed.id) else { return nil }
+            return (ed.name, idx)
         }
     }
 

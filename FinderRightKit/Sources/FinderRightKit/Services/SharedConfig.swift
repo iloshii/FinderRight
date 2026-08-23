@@ -43,6 +43,7 @@ public final class SharedConfig {
         static let enabledActions = "enabledActions"
         static let preferredTerminal = "preferredTerminal"
         static let preferredEditor = "preferredEditor"
+        static let enabledEditors = "enabledEditors"
         static let customFileTemplates = "customFileTemplates"
         static let showHiddenFiles = "showHiddenFiles"
         static let shortcuts = "shortcuts"
@@ -123,6 +124,31 @@ public final class SharedConfig {
             store[Keys.preferredEditor] = newValue
             save()
         }
+    }
+
+    // MARK: - Enabled Editors
+
+    /// 「打开编辑器」子菜单里每个编辑器的勾选状态，key 为 bundle identifier
+    public var enabledEditors: [String: Bool] {
+        get {
+            return store[Keys.enabledEditors] as? [String: Bool] ?? [:]
+        }
+        set {
+            store[Keys.enabledEditors] = newValue
+            save()
+        }
+    }
+
+    /// 检查编辑器是否被勾选展示（未设置默认勾选，向后兼容）
+    public func isEditorEnabled(_ bundleId: String) -> Bool {
+        return enabledEditors[bundleId] ?? true
+    }
+
+    /// 设置指定编辑器的勾选状态
+    public func setEditorEnabled(_ bundleId: String, enabled: Bool) {
+        var current = enabledEditors
+        current[bundleId] = enabled
+        enabledEditors = current
     }
 
     // MARK: - Custom File Templates

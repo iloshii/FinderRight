@@ -32,7 +32,7 @@ struct SettingsView: View {
         case general = "通用"
         case features = "功能"
         case shortcuts = "快捷键"
-        case tools = "终端"
+        case tools = "终端 / 编辑器"
         case about = "关于"
 
         var icon: String {
@@ -193,6 +193,7 @@ struct FeaturesTab: View {
 struct ToolsTab: View {
     @State private var availableTerminals: [TerminalApp] = []
     @State private var selectedTerminalBundleId: String = "com.apple.Terminal"
+    @State private var availableEditors: [KnownEditor] = []
 
     var body: some View {
         Form {
@@ -216,11 +217,29 @@ struct ToolsTab: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
+
+            Section {
+                ForEach(availableEditors) { editor in
+                    Toggle(isOn: Binding(
+                        get: { SharedConfig.shared.isEditorEnabled(editor.id) },
+                        set: { SharedConfig.shared.setEditorEnabled(editor.id, enabled: $0) }
+                    )) {
+                        Text(editor.name) // 品牌名不做本地化（EditorCatalog 注释约定）
+                    }
+                }
+            } header: {
+                Text("编辑器")
+            } footer: {
+                Text("勾选后才会出现在右键菜单的「打开编辑器」子菜单")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
         .formStyle(.grouped)
         .padding()
         .onAppear {
             detectInstalledApps()
+            detectInstalledEditors()
             // 读取已保存偏好（bundleId）；若对应 App 未安装则回退到第一个可用项，
             // 并把解析结果写回，保证「设置里显示的」与「扩展实际使用的」一致。
             let savedTerminal = SharedConfig.shared.preferredTerminal
@@ -239,6 +258,13 @@ struct ToolsTab: View {
             availableTerminals = [TerminalApp.knownTerminals[0]] // 系统终端总是可用
         }
     }
+
+    private func detectInstalledEditors() {
+        availableEditors = EditorCatalog.all.filter {
+            NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0.id) != nil
+        }
+    }
+
 }
 
 // MARK: - 关于 Tab
