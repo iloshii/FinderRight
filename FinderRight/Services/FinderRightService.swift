@@ -282,18 +282,29 @@ final class FinderRightService {
     }
 
     private func toggleHiddenFiles(_ req: IPCRequest) -> IPCResponse {
-        // 用 CGEventPostToPid 直接向 Finder 进程发送 Cmd+Shift+.
-        // 只需辅助功能权限，无需 Automation（Apple Events）权限，也不依赖前台焦点。
-        let opts = ["AXTrustedCheckOptionPrompt": false] as CFDictionary
+        // 用 CGEventPostToPid 向 Finder 进程发送 Cmd+Shift+.，实时切换隐藏文件，
+        // 不写 defaults、不重启 Finder（与用户手动按快捷键的会话级语义一致）。
+        //
+        // 关键前提：菜单快捷键只对前台应用生效。必须先把 Finder 激活到前台再投递，
+        // 否则事件被静默忽略——旧实现未激活 Finder，快路径从未真正生效过。
+        let opts = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
         guard AXIsProcessTrustedWithOptions(opts) else {
-            serviceLog("no Accessibility permission, fallback to defaults")
-            return toggleHiddenFilesViaDefaults(req)
+            // 无辅助功能权限：弹系统授权提示（上面 prompt: true 触发），绝不重启 Finder
+            serviceLog("no Accessibility permission; prompted user for grant")
+            return IPCResponse(id: req.id, success: false,
+                               message: "缺少辅助功能权限；请在弹出的系统设置中授权 FinderRight 后重试")
         }
 
         guard let finder = NSRunningApplication.runningApplications(
             withBundleIdentifier: "com.apple.finder").first else {
-            serviceLog("Finder not running, fallback to defaults")
-            return toggleHiddenFilesViaDefaults(req)
+            return IPCResponse(id: req.id, success: false, message: "Finder 未运行")
+        }
+
+        // 记录当前前台应用，切换完成后恢复焦点，避免打断用户操作
+        let previous = NSWorkspace.shared.frontmostApplication
+        if previous != finder {
+            finder.activate()
+            usleep(300_000) // 等待激活完成，确保快捷键路由到 Finder
         }
 
         let pid = finder.processIdentifier
@@ -306,6 +317,11 @@ final class FinderRightService {
         down?.postToPid(pid)
         up?.postToPid(pid)
 
+        if let prev = previous, prev != finder, !prev.isTerminated {
+            usleep(200_000) // 给 Finder 一点时间处理完按键再还回焦点
+            prev.activate()
+        }
+
         serviceLog("sent Cmd+Shift+. to Finder pid=\(pid)")
         return IPCResponse(id: req.id, success: true, message: "toggled via CGEvent pid=\(pid)")
     }
@@ -314,37 +330,6 @@ final class FinderRightService {
         NSLog("[FinderRightService] \(message)")
     }
 
-    private func toggleHiddenFilesViaDefaults(_ req: IPCRequest) -> IPCResponse {
-        do {
-            let readProc = Process()
-            readProc.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
-            readProc.arguments = ["read", "com.apple.finder", "AppleShowAllFiles"]
-            let pipe = Pipe()
-            readProc.standardOutput = pipe
-            readProc.standardError = Pipe()
-            try readProc.run()
-            readProc.waitUntilExit()
-            let output = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
-                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            let newValue = (output.uppercased() == "YES" || output == "1") ? "NO" : "YES"
-
-            let writeProc = Process()
-            writeProc.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
-            writeProc.arguments = ["write", "com.apple.finder", "AppleShowAllFiles", newValue]
-            try writeProc.run()
-            writeProc.waitUntilExit()
-
-            let killProc = Process()
-            killProc.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
-            killProc.arguments = ["Finder"]
-            try killProc.run()
-            killProc.waitUntilExit()
-
-            return IPCResponse(id: req.id, success: true, message: "set to \(newValue), restarted Finder")
-        } catch {
-            return IPCResponse(id: req.id, success: false, message: error.localizedDescription)
-        }
-    }
 
     // MARK: - 剪切 / 粘贴（先移到暂存区，再粘贴到目标）
 
